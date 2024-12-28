@@ -1,0 +1,126 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: youtrack-storage-class
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-ssd
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: youtrack-data-pv-claim
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: microk8s-hostpath
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: youtrack-conf-pv-claim
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: microk8s-hostpath
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: youtrack-logs-pv-claim
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: microk8s-hostpath
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: youtrack-backups-pv-claim
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: microk8s-hostpath
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: youtrack-deployment
+  namespace: default
+  labels:
+    app: youtrack
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: youtrack
+      bb: web
+  template:
+    metadata:
+      labels:
+        app: youtrack
+        bb: web
+    spec:
+      containers:
+        - name: youtrack
+#          ports:
+#            - containerPort: 1025
+#          env:
+#            - name: JVM_OPTIONS
+#              value: "-Dlisten-port=1025"
+          image: jetbrains/youtrack:2024.3.44799
+          volumeMounts:
+            - name: opt-youtrack-data
+              mountPath: /opt/youtrack/data
+            - name: opt-youtrack-conf
+              mountPath: /opt/youtrack/conf
+            - name: opt-youtrack-logs
+              mountPath: /opt/youtrack/logs
+            - name: opt-youtrack-backups
+              mountPath: /opt/youtrack/backups
+      volumes:
+        - name: opt-youtrack-data
+          persistentVolumeClaim:
+            claimName: youtrack-data-pv-claim
+        - name: opt-youtrack-conf
+          persistentVolumeClaim:
+            claimName: youtrack-conf-pv-claim
+        - name: opt-youtrack-logs
+          persistentVolumeClaim:
+            claimName: youtrack-logs-pv-claim
+        - name: opt-youtrack-backups
+          persistentVolumeClaim:
+            claimName: youtrack-backups-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: youtrack-entrypoint
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: youtrack
+    bb: web
+  ports:
+    - port: 8080
