@@ -12,7 +12,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: youtrack-data-pv-claim
-  namespace: default
+  namespace: youtrack
 spec:
   accessModes:
     - ReadWriteOnce
@@ -25,7 +25,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: youtrack-conf-pv-claim
-  namespace: default
+  namespace: youtrack
 spec:
   accessModes:
     - ReadWriteOnce
@@ -38,7 +38,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: youtrack-logs-pv-claim
-  namespace: default
+  namespace: youtrack
 spec:
   accessModes:
     - ReadWriteOnce
@@ -51,7 +51,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: youtrack-backups-pv-claim
-  namespace: default
+  namespace: youtrack
 spec:
   accessModes:
     - ReadWriteOnce
@@ -64,7 +64,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: youtrack-deployment
-  namespace: default
+  namespace: youtrack
   labels:
     app: youtrack
 spec:
@@ -116,7 +116,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: youtrack-entrypoint
-  namespace: default
+  namespace: youtrack
 spec:
   type: NodePort
   selector:
